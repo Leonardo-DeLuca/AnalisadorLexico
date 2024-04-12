@@ -1,3 +1,5 @@
+import re
+
 #entrada, geralmente vem de um arquivo texto
 palavra = ''
 
@@ -13,7 +15,6 @@ dicionario = {
     "numerofloat": "6",
     "nomevariavel": "7",
     "nomedochar": "8",
-    "nomedavariavel": "9",
     "nomedastring": "10",
     "main": "11",
     "literal": "12",
@@ -73,7 +74,6 @@ while 1:
         lexemas.append(lexema)
         tokens.append(dicionario.get(lexema))
         lexema = ''
-    
     elif char != ' ':  #se nao for espaço... aqui tem q colocar 
                        #outros caracters como pontuacao e parentização
             lexema = lexema + char
@@ -82,6 +82,9 @@ while 1:
             if dicionario.get(lexema):
                 lexemas.append(lexema)
                 tokens.append(dicionario.get(lexema))
+            elif re.search('^[_a-zA-Z0-9][_a-zA-Z0-9]*$', lexema):
+                lexemas.append('nomevariavel')
+                tokens.append(dicionario.get('nomevariavel'))
             lexema = ''
 
     if not char:
@@ -90,10 +93,6 @@ while 1:
             tokens.append(dicionario.get(lexema))
             lexema = ''
         break
-
-    
-
-    
 
 print(lexemas)
 print(tokens)

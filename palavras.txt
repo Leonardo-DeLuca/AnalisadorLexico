@@ -1,1 +1,1 @@
-void main{ inicio;fim} while
+void main{ inicio; joao fim} while
