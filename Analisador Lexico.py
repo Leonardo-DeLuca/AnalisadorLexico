@@ -63,13 +63,15 @@ while 1:
      
     char = file.read(1)   
 
-    if char == '{': 
+    if char == '{' or char == ';' or char == '}': 
         if lexema != '':
             lexemas.append(lexema)
+            tokens.append(dicionario.get(lexema))
             lexema = ''
 
         lexema = char
         lexemas.append(lexema)
+        tokens.append(dicionario.get(lexema))
         lexema = ''
     
     elif char != ' ':  #se nao for espaço... aqui tem q colocar 
@@ -77,16 +79,21 @@ while 1:
             lexema = lexema + char
     else:
         if lexema != '':
-            lexemas.append(lexema)
+            if dicionario.get(lexema):
+                lexemas.append(lexema)
+                tokens.append(dicionario.get(lexema))
             lexema = ''
 
-    if not char: 
+    if not char:
+        if dicionario.get(lexema):
+            lexemas.append(lexema)
+            tokens.append(dicionario.get(lexema))
+            lexema = ''
         break
 
     
 
-    if dicionario.get(lexema):
-        tokens.append(dicionario.get(lexema))
+    
 
 print(lexemas)
 print(tokens)
