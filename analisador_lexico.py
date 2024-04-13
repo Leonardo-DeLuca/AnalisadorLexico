@@ -98,8 +98,8 @@ def analisar_arquivo(nome_arquivo, dicionario):
 def main():
     dicionario = carregar_dicionario()
     tokens, lexemas = analisar_arquivo("palavras.txt", dicionario)
-    print(lexemas)
-    print(tokens)
+    for token, lexema in zip(tokens, lexemas):
+        print(f"Token: {token} - Lexema: {lexema}")
 
 
 if __name__ == "__main__":
