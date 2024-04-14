@@ -139,19 +139,22 @@ def adicionaLexemasETokens(dicionario, lexemas, tokens, nomeDoToken):
     lexemas.append(nomeDoToken)
     tokens.append(dicionario.get(nomeDoToken))
 
-
 def main():
     dicionario = carregar_dicionario()
     tokens, lexemas, linhas = analisar_arquivo("palavras.txt", dicionario)
 
-    print(lexemas)
-    print(tokens)
-    print(linhas)
-
+    for i in range(len(tokens)):
+        print(
+            "\033[1;32mToken: \033[0m"
+            + tokens[i]
+            + " \033[1;34m- Lexema: \033[0m"
+            + lexemas[i]
+            + " \033[1;33m- Linha: \033[0m"
+            + str(linhas[i])
+        )
 
 if __name__ == "__main__":
     main()
-
 
 #     elif lexema == 'inicio':
 #         tokens.append(15)
