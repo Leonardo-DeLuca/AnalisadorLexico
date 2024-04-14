@@ -1,6 +1,5 @@
 import re
 
-
 def carregar_dicionario():
     return {
         "while": "1",
@@ -59,40 +58,80 @@ def analisar_arquivo(nome_arquivo, dicionario):
 
     with open(nome_arquivo, "r") as file:
         lexema = ""
+        dentroString = False
+        dentroLiteral = False
+
         while True:
             char = file.read(1)
 
-            if char in {"{", ";", "}"}:
+            if dentroString or dentroLiteral:
+                lexema += char
+                if char == "'":
+                    dentroString = False
+                    ## Maior que 3 porque o char fica no formato 'x' sempre. Três caracteres.
+                    adicionaLexemasETokens(dicionario, lexemas, tokens, "nomedastring" if len(lexema) > 3 else "nomedochar")
+                    lexema = ""
+
+                if char == '"':
+                    dentroLiteral = False
+                    adicionaLexemasETokens(dicionario, lexemas, tokens, "literal")
+                    lexema = ""
+            elif char in {"{", ";", "}", "(", ")"}:
                 if lexema:
-                    lexemas.append(lexema)
-                    tokens.append(dicionario.get(lexema))
+                    if lexema in dicionario:
+                        adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
+                    elif re.search("^\d+$", lexema):
+                        adicionaLexemasETokens(dicionario, lexemas, tokens, "numerointeiro")
+                    ## Aqui ele valida obrigatoriamente a existência de um digito antes do ponto.
+                    ## Não aceita .23, apenas 0.23, 114546.43, etc.
+                    elif re.search("^\d+\.\d+$", lexema):
+                        adicionaLexemasETokens(dicionario, lexemas, tokens, "numerofloat")
+                    elif re.search("^[_a-zA-Z0-9][_a-zA-Z0-9]*$", lexema):
+                        adicionaLexemasETokens(dicionario, lexemas, tokens, "nomevariavel")
                     lexema = ""
 
                 lexema = char
-                lexemas.append(lexema)
-                tokens.append(dicionario.get(lexema))
+                adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
                 lexema = ""
-            elif char != " ":  # se nao for espaço... aqui tem q colocar
-                # outros caracters como pontuacao e parentização
+            elif char != " ":
                 lexema += char
+
+                if (char == "'"):
+                    dentroString = True
+                
+                if (char == '"'):
+                    dentroLiteral = True
             else:
                 if lexema:
                     if lexema in dicionario:
-                        lexemas.append(lexema)
-                        tokens.append(dicionario.get(lexema))
+                        adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
+                    elif re.search("^\d+$", lexema):
+                        adicionaLexemasETokens(dicionario, lexemas, tokens, "numerointeiro")
+                    elif re.search("^\d+\.\d+$", lexema):
+                        adicionaLexemasETokens(dicionario, lexemas, tokens, "numerofloat")
                     elif re.search("^[_a-zA-Z0-9][_a-zA-Z0-9]*$", lexema):
-                        lexemas.append("nomevariavel")
-                        tokens.append(dicionario.get("nomevariavel"))
+                        adicionaLexemasETokens(dicionario, lexemas, tokens, "nomevariavel")
                     lexema = ""
 
             if not char:
                 if lexema:
-                    lexemas.append(lexema)
-                    tokens.append(dicionario.get(lexema))
+                    if lexema in dicionario:
+                        adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
+                    elif re.search("^\d+$", lexema):
+                        adicionaLexemasETokens(dicionario, lexemas, tokens, "numerointeiro")
+                    elif re.search("^\d+\.\d+$", lexema):
+                        adicionaLexemasETokens(dicionario, lexemas, tokens, "numerofloat")
+                    elif re.search("^[_a-zA-Z0-9][_a-zA-Z0-9]*$", lexema):
+                        adicionaLexemasETokens(dicionario, lexemas, tokens, "nomevariavel")
                     lexema = ""
                 break
 
     return tokens, lexemas
+
+## Função para evitar repetição
+def adicionaLexemasETokens(dicionario, lexemas, tokens, nomeDoToken):
+    lexemas.append(nomeDoToken)
+    tokens.append(dicionario.get(nomeDoToken))
 
 
 def main():
@@ -100,6 +139,9 @@ def main():
     tokens, lexemas = analisar_arquivo("palavras.txt", dicionario)
     for token, lexema in zip(tokens, lexemas):
         print(f"Token: {token} - Lexema: {lexema}")
+
+    print(lexemas)
+    print(tokens)
 
 
 if __name__ == "__main__":

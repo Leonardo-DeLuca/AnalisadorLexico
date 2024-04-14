@@ -1,1 +1,1 @@
-while void string return numerointeiro numerofloat joao nomedochar nomedastring main literal integer inicio if î for float fim else do cout cin char callfuncao >> >= > == = <= << < ++ + } { ; : / , * ) ( $ != -- -
+void main{inicio; cout >> "Não sou eu o mentiroso, foi Sartre quem escreveu o livro" 'x' 'asdhuiaih' funcao(nome) fim } vinicius
