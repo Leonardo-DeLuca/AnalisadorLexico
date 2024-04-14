@@ -1,1 +1,2 @@
-void main{inicio; cout >> "Não sou eu o mentiroso, foi Sartre quem escreveu o livro" 'x' 'asdhuiaih' funcao(nome) fim } vinicius
+void main{inicio; cout >> "Não sou eu o mentiroso, foi Sartre quem escreveu o livro" 
+'x' 'asdhuiaih' funcao(nome) fim } vinicius

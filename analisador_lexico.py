@@ -94,7 +94,8 @@ def analisar_arquivo(nome_arquivo, dicionario):
                 adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
                 lexema = ""
             elif char != " ":
-                lexema += char
+                if (char != '\n'):
+                    lexema += char
 
                 if (char == "'"):
                     dentroString = True
