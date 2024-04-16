@@ -1,4 +1,9 @@
 ##Inicio codigo
-void main{
-    cout ++"HAHAHA"
+void main {
+    "Testando strings nao fechadas
+    cout >> `top demais`
+    'asdfsd'
+    #* Comentario bloco
+    bosta
+    fim
 }

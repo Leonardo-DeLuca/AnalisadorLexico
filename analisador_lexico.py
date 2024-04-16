@@ -51,86 +51,139 @@ def carregar_dicionario():
         "-": "48",
     }
 
+def isDelimitador(char):
+    delimitadores = ["{", "}", ";", "(", ")", ":", ","]
 
-def analisar_arquivo(nome_arquivo, dicionario):
-    simbolos = {"{", ";", "}", "(", ")", ":"}
+    if char in delimitadores:
+        return True
+
+    return False
+
+def isOperador(char):
+    operadores = [">", ">>", "<", "<<", "<=", ">=", "=", "==", "+", "-", "++", "--", "/", "*", "!="]
+
+    if char in operadores:
+        return True
     
+    return False
+
+def analisar_arquivo(nome_arquivo, dicionario):    
     tokens = []
     lexemas = []
     linhas = []
 
     with open(nome_arquivo, "r") as file:
-        linhas_do_arquivo = file.read().splitlines()
+        numeroLinha = 1
 
-        comentarioBloco = False
+        linha = file.readline()
 
-        for linha_atual, linha in enumerate(linhas_do_arquivo, start=1):
+        while (linha):
+            tamanhoLinha = len(linha)
             lexema = ""
-            dentroString = False
-            dentroLiteral = False
-            comentarioLinha = False
+            contadorCharAtual = 0
 
-            for index, char in enumerate(linha):
-                if index != len(linha) - 1:
-                    proximoChar = linha[index + 1]
-                    
-                charAnterior = linha[index - 1]
+            while contadorCharAtual < tamanhoLinha:
+                char = linha[contadorCharAtual]
+                proximoChar = None
 
-                if comentarioLinha == True and char != '\n':
-                    continue
-
-                if comentarioBloco == True:
-                    if char == '#' and charAnterior == '*':
-                        comentarioBloco = False
-                    continue
-
-                elif dentroString or dentroLiteral:
-                    lexema += char
-                    if char == "'":
-                        dentroString = False
-                        ## Maior que 3 porque o char fica no formato 'x' sempre. Três caracteres.
-                        adicionaLexemasETokens(dicionario, lexemas, tokens, "nomedastring" if len(lexema) > 3 else "nomedochar")
-                        linhas.append(linha_atual)
-                        lexema = ""
-
-                    if char == '"':
-                        dentroLiteral = False
-                        adicionaLexemasETokens(dicionario, lexemas, tokens, "literal")
-                        linhas.append(linha_atual)
-                        lexema = ""
-                        
-                elif char in {"{", ";", "}", "(", ")", ":"}:
+                if contadorCharAtual != len(linha) - 1:
+                    proximoChar = linha[contadorCharAtual + 1]
+    
+                if isDelimitador(char):
                     if lexema:
-                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual)
+                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha)
                         lexema = ""
 
                     lexema = char
                     adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
-                    linhas.append(linha_atual)
+                    linhas.append(numeroLinha)
+                    lexema = ""
+                ## Valida os comentários de linha pulando para a próxima
+                elif char == '#' and proximoChar == '#':
+                    contadorCharAtual = tamanhoLinha
+                ## Valida os comentários de bloco loopando entre os chars até achar o *#.
+                ## Se não achar, é erro léxico. Ignora o resto dos tokens.
+                elif char == '#' and proximoChar == '*':
+                    contadorBlocoComentario = True
+                    linhaComecoBloco = numeroLinha
+
+                    while contadorBlocoComentario and not (char == '*' and proximoChar == '#'):
+                        ## Verifica se o char atual e próximo vão existir
+                        if ((contadorCharAtual + 2) < tamanhoLinha):
+                            contadorCharAtual += 1
+                            char = linha[contadorCharAtual]
+                            proximoChar = linha[contadorCharAtual+1]                   
+                        else:
+                            linha = file.readline()
+                            tamanhoLinha = len(linha)
+                            numeroLinha += 1
+                            contadorCharAtual = -1
+                            ## O comentário não foi fechado pois acabaram as linhas do arquivo
+                            ## sem ocorrência de *#.
+                            if (not linha):
+                                print("Erro: Comentario nao fechado na linha %d" %linhaComecoBloco)
+                                contadorBlocoComentario = False
+
+                    contadorCharAtual += 1
+                elif char == "'" or char == '"':
+                    delimitador = char;
+                    contadorCharAtual += 1
+
+                    ## Tenta buscar mais uma ocorrência do delimitador na linha. Se não achar, retorna -1 e
+                    ## indica o erro de literal ou string não fechada
+                    if linha[contadorCharAtual:].find(delimitador) == -1:
+                        msg = "String nao fechada" if delimitador == '"' else "Char nao fechado"
+                        print("Erro: " + msg + " na linha %d" %numeroLinha)
+                        ## Passa para a próxima linha
+                        contadorCharAtual = tamanhoLinha
+                    else:
+                        indiceFinalDaStringOuChar = contadorCharAtual+linha[contadorCharAtual:].find(delimitador)
+                        lexema = linha[contadorCharAtual:indiceFinalDaStringOuChar]
+                        contadorCharAtual = indiceFinalDaStringOuChar
+
+                        if (delimitador == "'"):
+                            if (len(lexema) > 1):
+                                print("Erro: Char com mais de um caracter na linha %d" %numeroLinha)
+                            else:
+                                adicionaLexemasETokens(dicionario, lexemas, tokens, "nomedochar")
+                                linhas.append(numeroLinha)
+                        else:
+                            adicionaLexemasETokens(dicionario, lexemas, tokens, "nomedastring")
+                            linhas.append(numeroLinha)
+
+                        lexema = ""
+                elif char == "`":
+                    contadorCharAtual += 1
+
+                    if linha[contadorCharAtual:].find('`') == -1:
+                        print("Erro: Literal nao fechado na linha %d" %numeroLinha)
+                        contadorCharAtual = tamanhoLinha
+                    else:
+                        indiceFinalDoLiteral = contadorCharAtual+linha[contadorCharAtual:].find('`')
+                        lexema = linha[contadorCharAtual:indiceFinalDoLiteral]
+                        contadorCharAtual = indiceFinalDoLiteral
+
+                        adicionaLexemasETokens(dicionario, lexemas, tokens, "literal")
+                        linhas.append(numeroLinha)
+
                     lexema = ""
                 elif char != " ":
                     if char != '\n':
                         lexema += char
-
-                    if char == "'":
-                        dentroString = True
-
-                    if char == '"':
-                        dentroLiteral = True
-
-                    if char == '#' and proximoChar == '#':
-                        comentarioLinha = True
-                    elif char == '#' and proximoChar == '*':
-                        comentarioBloco = True
                         
                 else:
                     if lexema:
-                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual)
+                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha)
                         lexema = ""
+                
+                contadorCharAtual+=1
 
             if lexema:
-                processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual)
+                processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha)
                 lexema = ""
+
+            linha = file.readline()
+            numeroLinha += 1
 
     return tokens, lexemas, linhas
 
@@ -139,9 +192,6 @@ def adicionaLexemasETokens(dicionario, lexemas, tokens, nomeDoToken):
     tokens.append(dicionario.get(nomeDoToken))
 
 def processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual):
-    if (lexema == 'bol'):
-        print('a')
-
     if lexema in dicionario:
         adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
         linhas.append(linha_atual)
@@ -167,27 +217,8 @@ def main():
             # + lexemas[i]
             # + " \033[1;33m- Linha: \033[0m"
             # + str(linhas[i])
-            "\nToken: " + tokens[i] + " Lexema: " + lexemas[i] + " Linha: " + str(linhas[i])
+            "\nToken: " + tokens[i] + " | Lexema: " + lexemas[i] + " | Linha: " + str(linhas[i])
         )
 
 if __name__ == "__main__":
     main()
-
-#     elif lexema == 'inicio':
-#         tokens.append(15)
-#         lexemas.append(lexema)
-#     elif lexema == 'fim':
-#         tokens.append(20)
-#         lexemas.append(lexema)
-#     elif lexema == ';':
-#         tokens.append(40)
-#         lexemas.append(lexema)
-
-# #Entrega do lexico - token - lexema - linha
-# for i in range(0,len(tokens)):
-#     print('Token: '+str(tokens[i]) + ' - Lexema: '+str(lexemas[i]) + ' - Linha: 1' )
-
-# #print(tokens) # [2, 11, 39, 15, 40, 20, 38]
-
-# #salvar do lexico para entregar para o sintático
-# tokens = np.array(tokens) #converte lista do python para numpy array
