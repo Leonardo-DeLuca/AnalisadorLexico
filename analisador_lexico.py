@@ -53,19 +53,38 @@ def carregar_dicionario():
 
 
 def analisar_arquivo(nome_arquivo, dicionario):
+    simbolos = {"{", ";", "}", "(", ")", ":"}
+    
     tokens = []
     lexemas = []
     linhas = []
 
     with open(nome_arquivo, "r") as file:
         linhas_do_arquivo = file.read().splitlines()
+
+        comentarioBloco = False
+
         for linha_atual, linha in enumerate(linhas_do_arquivo, start=1):
             lexema = ""
             dentroString = False
             dentroLiteral = False
+            comentarioLinha = False
 
-            for char in linha:
-                if dentroString or dentroLiteral:
+            for index, char in enumerate(linha):
+                if index != len(linha) - 1:
+                    proximoChar = linha[index + 1]
+                    
+                charAnterior = linha[index - 1]
+
+                if comentarioLinha == True and char != '\n':
+                    continue
+
+                if comentarioBloco == True:
+                    if char == '#' and charAnterior == '*':
+                        comentarioBloco = False
+                    continue
+
+                elif dentroString or dentroLiteral:
                     lexema += char
                     if char == "'":
                         dentroString = False
@@ -79,19 +98,10 @@ def analisar_arquivo(nome_arquivo, dicionario):
                         adicionaLexemasETokens(dicionario, lexemas, tokens, "literal")
                         linhas.append(linha_atual)
                         lexema = ""
-                elif char in {"{", ";", "}", "(", ")"}:
+                        
+                elif char in {"{", ";", "}", "(", ")", ":"}:
                     if lexema:
-                        if lexema in dicionario:
-                            adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
-                        elif re.search("^\d+$", lexema):
-                            adicionaLexemasETokens(dicionario, lexemas, tokens, "numerointeiro")
-                    ## Aqui ele valida obrigatoriamente a existência de um digito antes do ponto.
-                    ## Não aceita .23, apenas 0.23, 114546.43, etc.
-                        elif re.search("^\d+\.\d+$", lexema):
-                            adicionaLexemasETokens(dicionario, lexemas, tokens, "numerofloat")
-                        elif re.search("^[_a-zA-Z0-9][_a-zA-Z0-9]*$", lexema):
-                            adicionaLexemasETokens(dicionario, lexemas, tokens, "nomevariavel")
-                        linhas.append(linha_atual)
+                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual)
                         lexema = ""
 
                     lexema = char
@@ -99,45 +109,51 @@ def analisar_arquivo(nome_arquivo, dicionario):
                     linhas.append(linha_atual)
                     lexema = ""
                 elif char != " ":
-                    if (char != '\n'):
+                    if char != '\n':
                         lexema += char
 
-                    if (char == "'"):
+                    if char == "'":
                         dentroString = True
 
-                    if (char == '"'):
+                    if char == '"':
                         dentroLiteral = True
+
+                    if char == '#' and proximoChar == '#':
+                        comentarioLinha = True
+                    elif char == '#' and proximoChar == '*':
+                        comentarioBloco = True
+                        
                 else:
                     if lexema:
-                        if lexema in dicionario:
-                            adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
-                        elif re.search("^\d+$", lexema):
-                            adicionaLexemasETokens(dicionario, lexemas, tokens, "numerointeiro")
-                        elif re.search("^\d+\.\d+$", lexema):
-                            adicionaLexemasETokens(dicionario, lexemas, tokens, "numerofloat")
-                        elif re.search("^[_a-zA-Z0-9][_a-zA-Z0-9]*$", lexema):
-                            adicionaLexemasETokens(dicionario, lexemas, tokens, "nomevariavel")
-                        linhas.append(linha_atual)
+                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual)
                         lexema = ""
 
             if lexema:
-                if lexema in dicionario:
-                    adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
-                elif re.search("^\d+$", lexema):
-                    adicionaLexemasETokens(dicionario, lexemas, tokens, "numerointeiro")
-                elif re.search("^\d+\.\d+$", lexema):
-                    adicionaLexemasETokens(dicionario, lexemas, tokens, "numerofloat")
-                elif re.search("^[_a-zA-Z0-9][_a-zA-Z0-9]*$", lexema):
-                    adicionaLexemasETokens(dicionario, lexemas, tokens, "nomevariavel")
-                linhas.append(linha_atual)
+                processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual)
                 lexema = ""
 
     return tokens, lexemas, linhas
 
-
 def adicionaLexemasETokens(dicionario, lexemas, tokens, nomeDoToken):
     lexemas.append(nomeDoToken)
     tokens.append(dicionario.get(nomeDoToken))
+
+def processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual):
+    if (lexema == 'bol'):
+        print('a')
+
+    if lexema in dicionario:
+        adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
+        linhas.append(linha_atual)
+    elif re.search("^\d+$", lexema):
+        adicionaLexemasETokens(dicionario, lexemas, tokens, "numerointeiro")
+        linhas.append(linha_atual)
+    elif re.search("^\d+\.\d+$", lexema):
+        adicionaLexemasETokens(dicionario, lexemas, tokens, "numerofloat")
+        linhas.append(linha_atual)
+    elif re.search("^[_a-zA-Z][_a-zA-Z0-9]*$", lexema):
+        adicionaLexemasETokens(dicionario, lexemas, tokens, "nomevariavel")
+        linhas.append(linha_atual)
 
 def main():
     dicionario = carregar_dicionario()
@@ -145,12 +161,13 @@ def main():
 
     for i in range(len(tokens)):
         print(
-            "\033[1;32mToken: \033[0m"
-            + tokens[i]
-            + " \033[1;34m- Lexema: \033[0m"
-            + lexemas[i]
-            + " \033[1;33m- Linha: \033[0m"
-            + str(linhas[i])
+            # "\033[1;32mToken: \033[0m"
+            # + tokens[i]
+            # + " \033[1;34m- Lexema: \033[0m"
+            # + lexemas[i]
+            # + " \033[1;33m- Linha: \033[0m"
+            # + str(linhas[i])
+            "\nToken: " + tokens[i] + " Lexema: " + lexemas[i] + " Linha: " + str(linhas[i])
         )
 
 if __name__ == "__main__":
