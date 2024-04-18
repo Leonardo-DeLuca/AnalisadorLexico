@@ -67,6 +67,14 @@ def isOperador(char):
     
     return False
 
+def isNumero(char):
+    numeros = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
+    if char in numeros:
+        return True
+    
+    return False
+
 def analisar_arquivo(nome_arquivo, dicionario):    
     tokens = []
     lexemas = []
@@ -94,9 +102,7 @@ def analisar_arquivo(nome_arquivo, dicionario):
                         processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha)
                         lexema = ""
 
-                    lexema = char
-                    adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
-                    linhas.append(numeroLinha)
+                    processaLexema(dicionario, lexemas, tokens, char, linhas, numeroLinha)
                     lexema = ""
                 ## Valida os comentários de linha pulando para a próxima
                 elif char == '#' and proximoChar == '#':
@@ -104,10 +110,10 @@ def analisar_arquivo(nome_arquivo, dicionario):
                 ## Valida os comentários de bloco loopando entre os chars até achar o *#.
                 ## Se não achar, é erro léxico. Ignora o resto dos tokens.
                 elif char == '#' and proximoChar == '*':
-                    contadorBlocoComentario = True
+                    ## Para saber a linha caso erro
                     linhaComecoBloco = numeroLinha
 
-                    while contadorBlocoComentario and not (char == '*' and proximoChar == '#'):
+                    while not (char == '*' and proximoChar == '#'):
                         ## Verifica se o char atual e próximo vão existir
                         if ((contadorCharAtual + 2) < tamanhoLinha):
                             contadorCharAtual += 1
@@ -122,7 +128,7 @@ def analisar_arquivo(nome_arquivo, dicionario):
                             ## sem ocorrência de *#.
                             if (not linha):
                                 print("Erro: Comentario nao fechado na linha %d" %linhaComecoBloco)
-                                contadorBlocoComentario = False
+                                break
 
                     contadorCharAtual += 1
                 elif char == "'" or char == '"':
@@ -130,7 +136,7 @@ def analisar_arquivo(nome_arquivo, dicionario):
                     contadorCharAtual += 1
 
                     ## Tenta buscar mais uma ocorrência do delimitador na linha. Se não achar, retorna -1 e
-                    ## indica o erro de literal ou string não fechada
+                    ## indica o erro de char ou string não fechada
                     if linha[contadorCharAtual:].find(delimitador) == -1:
                         msg = "String nao fechada" if delimitador == '"' else "Char nao fechado"
                         print("Erro: " + msg + " na linha %d" %numeroLinha)
@@ -145,11 +151,9 @@ def analisar_arquivo(nome_arquivo, dicionario):
                             if (len(lexema) > 1):
                                 print("Erro: Char com mais de um caracter na linha %d" %numeroLinha)
                             else:
-                                adicionaLexemasETokens(dicionario, lexemas, tokens, "nomedochar")
-                                linhas.append(numeroLinha)
+                                processaLexema(dicionario, lexemas, tokens, "nomedochar", linhas, numeroLinha)
                         else:
-                            adicionaLexemasETokens(dicionario, lexemas, tokens, "nomedastring")
-                            linhas.append(numeroLinha)
+                            processaLexema(dicionario, lexemas, tokens, "nomedastring", linhas, numeroLinha)
 
                         lexema = ""
                 elif char == "`":
@@ -163,10 +167,24 @@ def analisar_arquivo(nome_arquivo, dicionario):
                         lexema = linha[contadorCharAtual:indiceFinalDoLiteral]
                         contadorCharAtual = indiceFinalDoLiteral
 
-                        adicionaLexemasETokens(dicionario, lexemas, tokens, "literal")
-                        linhas.append(numeroLinha)
+                        processaLexema(dicionario, lexemas, tokens, "literal", linhas, numeroLinha)
 
                     lexema = ""
+                ## Operadores como ++ e >>
+                elif proximoChar != None and isOperador(char + proximoChar):
+                    ## Se tem algo colado no operador. Por exemplo cout>>
+                    ## Ele adicionará o cout antes, para ficar na ordem correta
+                    if lexema:
+                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha)
+                        lexema = ""
+
+                    processaLexema(dicionario, lexemas, tokens, char + proximoChar, linhas, numeroLinha)
+                    contadorCharAtual += 1
+                elif isOperador(char):
+                    if lexema:
+                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha)
+
+                    processaLexema(dicionario, lexemas, tokens, char, linhas, numeroLinha)
                 elif char != " ":
                     if char != '\n':
                         lexema += char

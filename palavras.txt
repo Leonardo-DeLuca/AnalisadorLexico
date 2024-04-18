@@ -1,9 +1,12 @@
 ##Inicio codigo
 void main {
-    "Testando strings nao fechadas
-    cout >> `top demais`
-    'asdfsd'
-    #* Comentario bloco
-    bosta
-    fim
+    c: float
+    d: float
+    
+    if (c == d) {
+        c++
+        cout>>`deu certo`
+    }else {
+        cout >> `deu errado`
+    }
 }
