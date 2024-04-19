@@ -1,4 +1,5 @@
 import re
+import string
 
 def carregar_dicionario():
     return {
@@ -75,6 +76,33 @@ def isNumero(char):
     
     return False
 
+def invalidosDecimal(char):
+    letras_e_simbolos = [
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '+',
+    '=', '{', '}', '[', ']', '|', '\\', ';', ':', "'", '"', '<', '>',
+    ',', '/', '?', '`', '~']
+
+    if char in letras_e_simbolos:
+        return True
+
+    return False
+
+def validaAscii(char):
+    letrasMaiusculas = string.ascii_uppercase
+    letrasMinusculas = string.ascii_lowercase
+    numeros = string.digits
+    simbolos = string.punctuation
+    todos = letrasMaiusculas + letrasMinusculas + numeros + simbolos
+
+    if char in todos:
+        return True
+
+    return False
+
 def analisar_arquivo(nome_arquivo, dicionario):    
     tokens = []
     lexemas = []
@@ -132,7 +160,7 @@ def analisar_arquivo(nome_arquivo, dicionario):
 
                     contadorCharAtual += 1
                 elif char == "'" or char == '"':
-                    delimitador = char;
+                    delimitador = char
                     contadorCharAtual += 1
 
                     ## Tenta buscar mais uma ocorrência do delimitador na linha. Se não achar, retorna -1 e
@@ -222,6 +250,23 @@ def processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual):
     elif re.search("^[_a-zA-Z][_a-zA-Z0-9]*$", lexema):
         adicionaLexemasETokens(dicionario, lexemas, tokens, "nomevariavel")
         linhas.append(linha_atual)
+    else:
+        if re.search("\d*\.", lexema):
+                partesString = lexema.split(".")
+                if partesString[1] == '':
+                    print("Erro: numero decimal sem casas apos o . na linha %d" %linha_atual)
+                else:
+                    for char in partesString[1]:
+                        if invalidosDecimal(char):
+                            print("Erro: numero decimal invalido na linha %d" %linha_atual)
+                            break
+        elif re.search("^[\W\d].*$", lexema):
+            print("Erro: nome de variavel invalido na linha %d" %linha_atual)
+        else:
+            for char in lexema:
+                if not validaAscii(char):
+                    print("Erro: caracter invalido na linha %d" %linha_atual)
+                    break
 
 def main():
     dicionario = carregar_dicionario()

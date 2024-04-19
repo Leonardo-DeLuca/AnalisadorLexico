@@ -1,12 +1,11 @@
 ##Inicio codigo
 void main {
-    c: float
-    d: float
-    
-    if (c == d) {
-        c++
-        cout>>`deu certo`
-    }else {
-        cout >> `deu errado`
-    }
+   c: float
+   d: float
+
+   if (c == d) {
+    callfuncao funcao1(c);
+    c++
+    d = c + 1.2
+   }
 }
