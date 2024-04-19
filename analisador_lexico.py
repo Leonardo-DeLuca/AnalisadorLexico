@@ -242,8 +242,12 @@ def processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual):
         adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
         linhas.append(linha_atual)
     elif re.search("^\d+$", lexema):
-        adicionaLexemasETokens(dicionario, lexemas, tokens, "numerointeiro")
-        linhas.append(linha_atual)
+        lexemaNumerico = int(lexema) 
+        if lexemaNumerico > 999999 or lexemaNumerico < -999999:
+            print("Erro: tamanho do numero invalido na linha %d" %linha_atual)
+        else:
+            adicionaLexemasETokens(dicionario, lexemas, tokens, "numerointeiro")
+            linhas.append(linha_atual)
     elif re.search("^\d+\.\d+$", lexema):
         adicionaLexemasETokens(dicionario, lexemas, tokens, "numerofloat")
         linhas.append(linha_atual)
@@ -251,7 +255,7 @@ def processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual):
         adicionaLexemasETokens(dicionario, lexemas, tokens, "nomevariavel")
         linhas.append(linha_atual)
     else:
-        if re.search("\d*\.", lexema):
+        if re.search("\d+\.", lexema):
                 partesString = lexema.split(".")
                 if partesString[1] == '':
                     print("Erro: numero decimal sem casas apos o . na linha %d" %linha_atual)
@@ -274,12 +278,6 @@ def main():
 
     for i in range(len(tokens)):
         print(
-            # "\033[1;32mToken: \033[0m"
-            # + tokens[i]
-            # + " \033[1;34m- Lexema: \033[0m"
-            # + lexemas[i]
-            # + " \033[1;33m- Linha: \033[0m"
-            # + str(linhas[i])
             "\nToken: " + tokens[i] + " | Lexema: " + lexemas[i] + " | Linha: " + str(linhas[i])
         )
 
