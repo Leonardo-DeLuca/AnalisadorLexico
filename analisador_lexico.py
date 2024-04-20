@@ -266,6 +266,9 @@ def processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual):
                             break
         elif re.search("^[\W\d].*$", lexema):
             print("Erro: nome de variavel invalido na linha %d" %linha_atual)
+        elif re.search("[a-zA-Z_]+[^a-zA-Z_\d]*", lexema):
+            print("Erro: nome de variavel invalido na linha %d" %linha_atual)
+
         else:
             for char in lexema:
                 if not validaAscii(char):

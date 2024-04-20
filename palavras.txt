@@ -1,5 +1,21 @@
-##Inicio codigo
 void main {
-   1.2
--2
+    inicio;
+
+    variavel: integer
+    variavel2: integer
+    variavel3: integer
+
+    variavel = 1
+    variavel2 = 2
+
+    variavel3 = variavel + variavel2
+
+    ## Expressao condicional
+    if (variavel3 == 3) {
+        cout >> `Variavel eh igual a 3`
+    } else {
+        cout >> `Variavel nao eh 3`
+    }
+
+    fim;
 }

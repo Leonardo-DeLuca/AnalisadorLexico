@@ -1,0 +1,11 @@
+#arquivo com erros
+void main{
+    real: float
+
+    real = 2.x
+
+    &variavelErrada
+    2variavelerrada2
+
+
+}
