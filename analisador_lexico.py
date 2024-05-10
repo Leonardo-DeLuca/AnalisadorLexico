@@ -68,6 +68,27 @@ def isOperador(char):
     
     return False
 
+def pegar_tokens(nome_arquivo, dicionario):
+    tokens = []
+    linhas = []
+
+    with open(nome_arquivo, "r") as file:
+        numeroLinha = 1
+        for linha in file:
+            lexemas = linha.strip().split()
+            for lexema in lexemas:
+                if lexema in dicionario:
+                    tokens.append({
+                        "linha": numeroLinha,
+                        "codigo": dicionario[lexema],
+                        "token": lexema
+                    })
+                    linhas.append(numeroLinha)
+            numeroLinha += 1
+
+    return tokens, linhas
+
+
 def isNumero(char):
     numeros = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
@@ -277,7 +298,7 @@ def processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual):
 
 def main():
     dicionario = carregar_dicionario()
-    tokens, lexemas, linhas = analisar_arquivo("palavras.txt", dicionario)
+    tokens, lexemas, linhas = analisar_arquivo("tests/palavras.txt", dicionario)
 
     for i in range(len(tokens)):
         print(
