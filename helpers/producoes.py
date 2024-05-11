@@ -1,4 +1,4 @@
-producoes = []
+producoes = [None] * 88
 
 producoes[1] = [2, 11, 37, 50, 51, 52, 36]
 producoes[2] = [7, 53, 39, 54, 38, 55]

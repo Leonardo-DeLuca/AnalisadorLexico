@@ -1,41 +1,49 @@
-import helpers.tabela_parsing as t_parsing
-import analisador_lexico as lexico
-import helpers.palavras_reservadas as p_reservadas
+from helpers.tabela_parsing import tabParsing
+from helpers.producoes import producoes
 
-def palavra_por_codigo(codigo):
-    return p_reservadas.palavras_reservadas.get(int(codigo))
+class Sintatico:
+    def __init__(self):
+        self.arrayExpansoes = []
+        self.arrayEntrada = []
 
-def parse(tabParsing, tokens):
-    simbolo_inicial = "S"  # Substitua "S" pelo símbolo inicial da sua gramática
-    pilha = ["$", simbolo_inicial]  # Pilha com o símbolo inicial e o marcador de fim de pilha
-    topo = pilha[-1]  # Topo da pilha
-    i = 0  # Índice para percorrer os tokens de entrada
-    while topo != "$" and i < len(tokens):
-        token_atual = palavra_por_codigo(tokens[i]["codigo"])
-        if topo == token_atual:  # Coincidência entre topo da pilha e token atual
-            pilha.pop()
-            i += 1
-        else:
-            regra = tabParsing[int(topo)][int(token_atual)]
-            print(regra)
-            if regra:
-                pilha.pop()
-                if regra != ["î"]:  # Não empilha se a produção é vazia
-                    pilha.extend(reversed(regra))
+    def parseia(self):
+        self.arrayEntrada = [2, 11, 37, 14, 38, 19, 36]
+        self.arrayEntrada.append('$')
+
+        self.arrayExpansoes[0:0] = producoes[1]
+        self.arrayExpansoes.append('$')
+
+        topoArrayExpansoes = self.arrayExpansoes[0]
+        topoArrayEntrada = self.arrayEntrada[0]
+
+        while topoArrayExpansoes != '$':
+            topoArrayExpansoes = self.arrayExpansoes[0]
+            topoArrayEntrada = self.arrayEntrada[0]
+
+            if topoArrayExpansoes == 16:
+                self.arrayExpansoes.pop(0)
+                topoArrayExpansoes = self.arrayExpansoes[0]
             else:
-                print(
-                    f"Erro de parsing: regra não encontrada para {topo} e {token_atual} na linha {tokens[i]['linha']}"
-                )
-                return False
-        topo = pilha[-1] if pilha else "$"  # Atualiza o topo
-    return True if topo == "$" and i == len(tokens) else False
+                if topoArrayExpansoes <= 48 and topoArrayExpansoes >= 1:
+                    if topoArrayExpansoes == topoArrayEntrada:
+                        self.arrayExpansoes.pop(0)
+                        self.arrayEntrada.pop(0);
+                        continue
+                    else:
+                        print("ERRO")
+                        break
+                elif topoArrayExpansoes <= 80 and topoArrayExpansoes >= 49:
+                    if tabParsing[topoArrayExpansoes][topoArrayEntrada] != None:
+                        self.arrayExpansoes.pop(0)
+                        listaProducao = producoes[tabParsing[topoArrayExpansoes][topoArrayEntrada]]
+                        self.arrayExpansoes[0:0] = listaProducao
+                        topoArrayExpansoes = self.arrayExpansoes[0]
+                    else:
+                        print("ERRO 2")
+                        break
 
-# Carrega o dicionário de palavras reservadas
-dicionario = lexico.carregar_dicionario()
-tokens, linhas = lexico.pegar_tokens("tests/palavras.txt", dicionario)
-
-resultado = parse(t_parsing.tabParsing, tokens)
-if resultado:
-    print("Análise sintática concluída com sucesso!")
-else:
-    print("Erro durante a análise sintática.")
+            print("ANALISE CONCLUIDA")
+                        
+    
+sintatico = Sintatico()
+sintatico.parseia()
