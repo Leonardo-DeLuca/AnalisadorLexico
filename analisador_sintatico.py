@@ -17,9 +17,6 @@ class Sintatico:
         topoArrayEntrada = self.arrayEntrada[0]
 
         while topoArrayExpansoes != '$':
-            topoArrayExpansoes = self.arrayExpansoes[0]
-            topoArrayEntrada = self.arrayEntrada[0]
-
             if topoArrayExpansoes == 16:
                 self.arrayExpansoes.pop(0)
                 topoArrayExpansoes = self.arrayExpansoes[0]
@@ -28,6 +25,8 @@ class Sintatico:
                     if topoArrayExpansoes == topoArrayEntrada:
                         self.arrayExpansoes.pop(0)
                         self.arrayEntrada.pop(0);
+                        topoArrayExpansoes = self.arrayExpansoes[0]
+                        topoArrayEntrada = self.arrayEntrada[0]
                         continue
                     else:
                         print("ERRO")
@@ -42,7 +41,7 @@ class Sintatico:
                         print("ERRO 2")
                         break
 
-            print("ANALISE CONCLUIDA")
+        print("ANALISE CONCLUIDA")
                         
     
 sintatico = Sintatico()
