@@ -5,9 +5,10 @@ class Sintatico:
     def __init__(self):
         self.arrayExpansoes = []
         self.arrayEntrada = []
+        self.erro = False
 
     def parseia(self):
-        self.arrayEntrada = [2, 11, 37, 14, 38, 19, 36]
+        self.arrayEntrada = [2, 11, 37, 14, 38, 15, 44, 7, 29, 7, 43, 37, 38, 36, 19, 36]
         self.arrayEntrada.append('$')
 
         self.arrayExpansoes[0:0] = producoes[1]
@@ -20,7 +21,7 @@ class Sintatico:
             if topoArrayExpansoes == 16:
                 self.arrayExpansoes.pop(0)
                 topoArrayExpansoes = self.arrayExpansoes[0]
-            else:
+            else:   
                 if topoArrayExpansoes <= 48 and topoArrayExpansoes >= 1:
                     if topoArrayExpansoes == topoArrayEntrada:
                         self.arrayExpansoes.pop(0)
@@ -30,6 +31,7 @@ class Sintatico:
                         continue
                     else:
                         print("ERRO")
+                        self.erro = True
                         break
                 elif topoArrayExpansoes <= 80 and topoArrayExpansoes >= 49:
                     if tabParsing[topoArrayExpansoes][topoArrayEntrada] != None:
@@ -39,9 +41,11 @@ class Sintatico:
                         topoArrayExpansoes = self.arrayExpansoes[0]
                     else:
                         print("ERRO 2")
+                        self.erro = True
                         break
 
-        print("ANALISE CONCLUIDA")
+        if self.erro != True:
+            print("ANALISE CONCLUIDA")
                         
     
 sintatico = Sintatico()
