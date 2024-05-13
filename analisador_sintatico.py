@@ -8,7 +8,7 @@ class Sintatico:
         self.erro = False
 
     def parseia(self):
-        self.arrayEntrada = [2, 11, 37, 14, 38, 15, 44, 7, 29, 7, 43, 37, 38, 36, 19, 36]
+        self.arrayEntrada = [2, 11, 37, 7, 39, 3, 38, 14, 38, 15, 44, 7, 29, 7, 43, 37, 38, 36, 20, 37, 38, 36, 38,  19, 36]
         self.arrayEntrada.append('$')
 
         self.arrayExpansoes[0:0] = producoes[1]
