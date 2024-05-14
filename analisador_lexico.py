@@ -68,27 +68,6 @@ def isOperador(char):
     
     return False
 
-def pegar_tokens(nome_arquivo, dicionario):
-    tokens = []
-    linhas = []
-
-    with open(nome_arquivo, "r") as file:
-        numeroLinha = 1
-        for linha in file:
-            lexemas = linha.strip().split()
-            for lexema in lexemas:
-                if lexema in dicionario:
-                    tokens.append({
-                        "linha": numeroLinha,
-                        "codigo": dicionario[lexema],
-                        "token": lexema
-                    })
-                    linhas.append(numeroLinha)
-            numeroLinha += 1
-
-    return tokens, linhas
-
-
 def isNumero(char):
     numeros = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
@@ -304,6 +283,15 @@ def main():
         print(
             "\nToken: " + tokens[i] + " | Lexema: " + lexemas[i] + " | Linha: " + str(linhas[i])
         )
+
+    geraResposta(tokens, linhas);
+
+def geraResposta(tokens, linhas):
+    with open("resp_lexico.txt", "w") as arquivo:
+        for i in range(len(tokens)):
+            arquivo.write(
+                tokens[i] + ";" + str(linhas[i]) + "\n"
+            )
 
 if __name__ == "__main__":
     main()
