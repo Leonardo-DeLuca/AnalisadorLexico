@@ -1,21 +1,13 @@
 void main {
+    joao: string;
+
     inicio;
 
-    variavel: integer
-    variavel2: integer
-    variavel3: integer
-
-    variavel = 1
-    variavel2 = 2
-
-    variavel3 = variavel + variavel2
-
-    ## Expressao condicional
-    if (variavel3 == 3) {
-        cout >> `Variavel eh igual a 3`
+    if (joao == joao) {
+        ;
     } else {
-        cout >> `Variavel nao eh 3`
-    }
+        ;
+    };
 
-    fim;
+    fim
 }

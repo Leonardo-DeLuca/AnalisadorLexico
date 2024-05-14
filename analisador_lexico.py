@@ -284,13 +284,13 @@ def main():
             "\nToken: " + tokens[i] + " | Lexema: " + lexemas[i] + " | Linha: " + str(linhas[i])
         )
 
-    geraResposta(tokens, linhas);
+    geraResposta(tokens, linhas, lexemas);
 
-def geraResposta(tokens, linhas):
+def geraResposta(tokens, linhas, lexemas):
     with open("resp_lexico.txt", "w") as arquivo:
         for i in range(len(tokens)):
             arquivo.write(
-                tokens[i] + ";" + str(linhas[i]) + "\n"
+                tokens[i] + "#" + str(linhas[i]) + "#" + lexemas[i] + "\n"
             )
 
 if __name__ == "__main__":
