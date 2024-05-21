@@ -1,18 +1,19 @@
 ##Inicio codigo
 void main{
-   nome: stirng
-   idade: integer
-   cpf: stirng
+   nome: string;
+   idade: integer;
+   cpf: string;
 
+inicio;
 ##Recebe valores
-   cout>> `Digite o nome:`
-   cin<< nome
+   cout << `Digite o nome:`;
+   cin >> nome;
 
-   cout>> `Digite a idade:`
-   cin<< idade
+   cout << `Digite a idade:`;
+   cin >> idade;
 
-   cout>> `Digite o cpf:`
-   cin<< cpf
+   cout << `Digite o cpf:`;
+   cin >> cpf;
 
    fim
 }

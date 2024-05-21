@@ -277,7 +277,7 @@ def processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual):
 
 def main():
     dicionario = carregar_dicionario()
-    tokens, lexemas, linhas = analisar_arquivo("tests/palavras.txt", dicionario)
+    tokens, lexemas, linhas = analisar_arquivo("tests/palavras3.txt", dicionario)
 
     for i in range(len(tokens)):
         print(

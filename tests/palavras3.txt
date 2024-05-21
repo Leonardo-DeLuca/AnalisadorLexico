@@ -1,11 +1,14 @@
-#arquivo com erros
+##Arquivo com erro sintático
 void main{
-    real: float
+   nome: string;
+   cpf: string;
 
-    real = 2.x
+inicio;
+##Recebe valores
+   cout << `Digite o nome:`;
+   cin >> nome;
 
-    &variavelErrada
-    2variavelerrada2
-
+   cout << `Digite o cpf:`;
+   cin >> cpf;
 
 }
