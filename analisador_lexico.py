@@ -275,9 +275,11 @@ def processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual):
                     print("Erro: caracter invalido na linha %d" %linha_atual)
                     break
 
-def main():
+def parseia(arquivo):
+    print("Comecando analise lexica...")
+
     dicionario = carregar_dicionario()
-    tokens, lexemas, linhas = analisar_arquivo("tests/palavras3.txt", dicionario)
+    tokens, lexemas, linhas = analisar_arquivo(arquivo, dicionario)
 
     for i in range(len(tokens)):
         print(
@@ -286,6 +288,8 @@ def main():
 
     geraResposta(tokens, linhas, lexemas);
 
+    print("\nAnalise lexica concluida!\n")
+
 def geraResposta(tokens, linhas, lexemas):
     with open("resp_lexico.txt", "w") as arquivo:
         for i in range(len(tokens)):
@@ -293,5 +297,5 @@ def geraResposta(tokens, linhas, lexemas):
                 tokens[i] + "#" + str(linhas[i]) + "#" + lexemas[i] + "\n"
             )
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

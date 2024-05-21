@@ -26,6 +26,8 @@ class Sintatico:
         return arrayLexico
 
     def parseia(self):
+        print("Comecando analise sintatica...\n")
+
         self.montaArrayEntrada()
         self.arrayEntrada.append('$')
 
@@ -75,5 +77,5 @@ class Sintatico:
             print("Analise sintatica concluida com sucesso!")
                         
     
-sintatico = Sintatico()
-sintatico.parseia()
+# sintatico = Sintatico()
+# sintatico.parseia()
