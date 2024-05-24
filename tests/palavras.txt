@@ -1,12 +1,16 @@
 void main {
-    joao: string;
+    fallen, yurih, ks, kye, chelo: string;
+    majors: integer;
 
     inicio;
 
-    if (joao == joao) {
-        ;
-    } else {
-        ;
+    if (majors == 2) {
+        fallen = "ABC";
+    };
+
+    if (majors == 2) {
+        ks = "ABC";
+        majors = majors + 1;
     };
 
     fim
