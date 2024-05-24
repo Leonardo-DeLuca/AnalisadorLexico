@@ -46,8 +46,6 @@
 7#13#nomevariavel
 30#13#=
 7#13#nomevariavel
-35#13#+
-5#13#numerointeiro
 38#13#;
 36#14#}
 38#14#;

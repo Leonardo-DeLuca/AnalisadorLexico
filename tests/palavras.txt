@@ -10,7 +10,7 @@ void main {
 
     if (majors == 2) {
         ks = "ABC";
-        majors = majors + 1;
+        majors = majors;
     };
 
     fim
