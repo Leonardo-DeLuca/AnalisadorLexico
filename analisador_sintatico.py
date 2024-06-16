@@ -1,5 +1,6 @@
 from helpers.tabela_parsing import tabParsing
 from helpers.producoes import producoes
+import analisador_semantico as analisadorSemantico
 
 class Sintatico:
     def __init__(self):
@@ -7,23 +8,19 @@ class Sintatico:
         self.arrayEntrada = []
         self.arrayLinhas = []
         self.arrayTokens = []
+        self.arrayLexemas = []
         self.elementoAnalisando = 0
         self.erro = False
+        self.analise_semantica = analisadorSemantico.Semantico()
 
     def montaArrayEntrada(self):
-        arrayLexico = []
-        
         with open("resp_lexico.txt", "r") as arquivo:
-            linha = arquivo.readline()
-
-            while (linha):
+            for linha in arquivo:
                 tokensLinhas = linha.strip().split("#")
                 self.arrayEntrada.append(int(tokensLinhas[0]))
                 self.arrayLinhas.append(tokensLinhas[1])
                 self.arrayTokens.append(tokensLinhas[2])
-                linha = arquivo.readline()
-
-        return arrayLexico
+                self.arrayLexemas.append(tokensLinhas[3])
 
     def parseia(self):
         print("Comecando analise sintatica...\n")
@@ -38,9 +35,12 @@ class Sintatico:
         topoArrayEntrada = self.arrayEntrada[0]
 
         while topoArrayExpansoes != '$':
-            print("Elemento da entrada sendo analisado: " + str(self.arrayEntrada[0]) + " | Token: " + str(self.arrayTokens[self.elementoAnalisando]) + " | Linha: " + str(self.arrayLinhas[self.elementoAnalisando]))
+            print(
+                "Elemento da entrada sendo analisado: " + str(self.arrayEntrada[0]) 
+                + " | Token: " + str(self.arrayTokens[self.elementoAnalisando]) 
+                + " | Linha: " + str(self.arrayLinhas[self.elementoAnalisando])
+                )
             print("Pilha: " + str(self.arrayExpansoes))
-
             if topoArrayExpansoes == 16:
                 self.arrayExpansoes.pop(0)
                 topoArrayExpansoes = self.arrayExpansoes[0]
@@ -48,8 +48,13 @@ class Sintatico:
                 if topoArrayExpansoes <= 48 and topoArrayExpansoes >= 1:
                     if topoArrayExpansoes == topoArrayEntrada:
                         self.arrayExpansoes.pop(0)
-                        self.arrayEntrada.pop(0);
-                        self.elementoAnalisando = self.elementoAnalisando + 1
+                        self.arrayEntrada.pop(0)
+                        token = self.arrayTokens[self.elementoAnalisando]
+                        linha = self.arrayLinhas[self.elementoAnalisando]
+                        proximoToken = self.arrayEntrada[0]
+                        lexema = self.arrayLexemas[self.elementoAnalisando]
+                        self.analise_semantica.executaAcaoSemantica(token, linha, proximoToken, lexema)
+                        self.elementoAnalisando += 1
                         topoArrayExpansoes = self.arrayExpansoes[0]
                         topoArrayEntrada = self.arrayEntrada[0]
                         continue
@@ -59,7 +64,7 @@ class Sintatico:
                         print("Token do erro: " + str(self.arrayTokens[self.elementoAnalisando]))
                         self.erro = True
                         break
-                elif topoArrayExpansoes <= 80 and topoArrayExpansoes >= 49:
+                elif 49 <= topoArrayExpansoes <= 80:
                     if tabParsing[topoArrayExpansoes][topoArrayEntrada] != None:
                         self.arrayExpansoes.pop(0)
                         listaProducao = producoes[tabParsing[topoArrayExpansoes][topoArrayEntrada]]
@@ -72,10 +77,6 @@ class Sintatico:
                         self.erro = True
                         break
 
-        if self.erro != True:
+        if not self.erro:
             print("Pilha: " + str(self.arrayExpansoes))
             print("Analise sintatica concluida com sucesso!")
-                        
-    
-# sintatico = Sintatico()
-# sintatico.parseia()
