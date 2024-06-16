@@ -107,6 +107,7 @@ def analisar_arquivo(nome_arquivo, dicionario):
     tokens = []
     lexemas = []
     linhas = []
+    lexema_original = []
 
     with open(nome_arquivo, "r") as file:
         numeroLinha = 1
@@ -127,10 +128,10 @@ def analisar_arquivo(nome_arquivo, dicionario):
     
                 if isDelimitador(char):
                     if lexema:
-                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha)
+                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha, lexema_original)
                         lexema = ""
 
-                    processaLexema(dicionario, lexemas, tokens, char, linhas, numeroLinha)
+                    processaLexema(dicionario, lexemas, tokens, char, linhas, numeroLinha, lexema_original)
                     lexema = ""
                 ## Valida os comentários de linha pulando para a próxima
                 elif char == '#' and proximoChar == '#':
@@ -179,9 +180,9 @@ def analisar_arquivo(nome_arquivo, dicionario):
                             if (len(lexema) > 1):
                                 print("Erro: Char com mais de um caracter na linha %d" %numeroLinha)
                             else:
-                                processaLexema(dicionario, lexemas, tokens, "nomedochar", linhas, numeroLinha)
+                                processaLexema(dicionario, lexemas, tokens, "nomedochar", linhas, numeroLinha, lexema_original)
                         else:
-                            processaLexema(dicionario, lexemas, tokens, "nomedastring", linhas, numeroLinha)
+                            processaLexema(dicionario, lexemas, tokens, "nomedastring", linhas, numeroLinha, lexema_original)
 
                         lexema = ""
                 elif char == "`":
@@ -195,7 +196,7 @@ def analisar_arquivo(nome_arquivo, dicionario):
                         lexema = linha[contadorCharAtual:indiceFinalDoLiteral]
                         contadorCharAtual = indiceFinalDoLiteral
 
-                        processaLexema(dicionario, lexemas, tokens, "literal", linhas, numeroLinha)
+                        processaLexema(dicionario, lexemas, tokens, "literal", linhas, numeroLinha, lexema_original)
 
                     lexema = ""
                 ## Operadores como ++ e >>
@@ -203,55 +204,60 @@ def analisar_arquivo(nome_arquivo, dicionario):
                     ## Se tem algo colado no operador. Por exemplo cout>>
                     ## Ele adicionará o cout antes, para ficar na ordem correta
                     if lexema:
-                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha)
+                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha, lexema_original)
                         lexema = ""
 
-                    processaLexema(dicionario, lexemas, tokens, char + proximoChar, linhas, numeroLinha)
+                    processaLexema(dicionario, lexemas, tokens, char + proximoChar, linhas, numeroLinha, lexema_original)
                     contadorCharAtual += 1
                 elif isOperador(char):
                     if lexema:
-                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha)
+                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha, lexema_original)
 
-                    processaLexema(dicionario, lexemas, tokens, char, linhas, numeroLinha)
+                    processaLexema(dicionario, lexemas, tokens, char, linhas, numeroLinha, lexema_original)
                 elif char != " ":
                     if char != '\n':
                         lexema += char
                         
                 else:
                     if lexema:
-                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha)
+                        processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha, lexema_original)
                         lexema = ""
                 
                 contadorCharAtual+=1
 
             if lexema:
-                processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha)
+                processaLexema(dicionario, lexemas, tokens, lexema, linhas, numeroLinha, lexema_original)
                 lexema = ""
 
             linha = file.readline()
             numeroLinha += 1
 
-    return tokens, lexemas, linhas
+    return tokens, lexemas, linhas, lexema_original
 
 def adicionaLexemasETokens(dicionario, lexemas, tokens, nomeDoToken):
     lexemas.append(nomeDoToken)
     tokens.append(dicionario.get(nomeDoToken))
 
-def processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual):
+def processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual, lexema_original):
     if lexema in dicionario:
+        lexema_original.append(lexema)
         adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
         linhas.append(linha_atual)
     elif re.search("^\d+$", lexema):
+        lexema_original.append(lexema)
         lexemaNumerico = int(lexema) 
         if lexemaNumerico > 999999 or lexemaNumerico < -999999:
             print("Erro: tamanho do numero invalido na linha %d" %linha_atual)
         else:
+            lexema_original.append(lexema)
             adicionaLexemasETokens(dicionario, lexemas, tokens, "numerointeiro")
             linhas.append(linha_atual)
     elif re.search("^\d+\.\d+$", lexema):
+        lexema_original.append(lexema)
         adicionaLexemasETokens(dicionario, lexemas, tokens, "numerofloat")
         linhas.append(linha_atual)
     elif re.search("^[_a-zA-Z][_a-zA-Z0-9]*$", lexema):
+        lexema_original.append(lexema)
         adicionaLexemasETokens(dicionario, lexemas, tokens, "nomevariavel")
         linhas.append(linha_atual)
     else:
@@ -279,22 +285,22 @@ def parseia(arquivo):
     print("Comecando analise lexica...")
 
     dicionario = carregar_dicionario()
-    tokens, lexemas, linhas = analisar_arquivo(arquivo, dicionario)
+    tokens, lexemas, linhas, lexema_original = analisar_arquivo(arquivo, dicionario)
 
     for i in range(len(tokens)):
         print(
             "\nToken: " + tokens[i] + " | Lexema: " + lexemas[i] + " | Linha: " + str(linhas[i])
         )
 
-    geraResposta(tokens, linhas, lexemas);
+    geraResposta(tokens, linhas, lexemas, lexema_original)
 
     print("\nAnalise lexica concluida!\n")
 
-def geraResposta(tokens, linhas, lexemas):
+def geraResposta(tokens, linhas, lexemas, lexema_original):
     with open("resp_lexico.txt", "w") as arquivo:
         for i in range(len(tokens)):
             arquivo.write(
-                tokens[i] + "#" + str(linhas[i]) + "#" + lexemas[i] + "\n"
+                tokens[i] + "#" + str(linhas[i]) + "#" + lexemas[i] + "#" + lexema_original[i] + "\n"
             )
 
 # if __name__ == "__main__":
