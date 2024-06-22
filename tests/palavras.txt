@@ -2,6 +2,14 @@ void main {
     fallen, yurih, ks, kye, chelo: string;
     majors: integer;
 
+    integer funcaoExemplo(float params) {
+        inicio;
+
+        fim
+        
+        return (chelo)
+    }
+
     inicio;
 
     if (majors == 2) {

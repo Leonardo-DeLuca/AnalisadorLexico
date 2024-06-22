@@ -11,7 +11,6 @@ class Sintatico:
         self.arrayLexemas = []
         self.elementoAnalisando = 0
         self.erro = False
-        self.analise_semantica = analisadorSemantico.Semantico()
 
     def montaArrayEntrada(self):
         with open("resp_lexico.txt", "r") as arquivo:
@@ -24,6 +23,8 @@ class Sintatico:
 
     def parseia(self):
         print("Comecando analise sintatica...\n")
+
+        self.analise_semantica = analisadorSemantico.Semantico(self.arrayTokens)
 
         self.montaArrayEntrada()
         self.arrayEntrada.append('$')
@@ -49,11 +50,14 @@ class Sintatico:
                     if topoArrayExpansoes == topoArrayEntrada:
                         self.arrayExpansoes.pop(0)
                         self.arrayEntrada.pop(0)
+
                         token = self.arrayTokens[self.elementoAnalisando]
                         linha = self.arrayLinhas[self.elementoAnalisando]
                         proximoToken = self.arrayEntrada[0]
                         lexema = self.arrayLexemas[self.elementoAnalisando]
-                        self.analise_semantica.executaAcaoSemantica(token, linha, proximoToken, lexema)
+
+                        self.analise_semantica.executaAcaoSemantica(token, linha, proximoToken, lexema, self.elementoAnalisando)
+
                         self.elementoAnalisando += 1
                         topoArrayExpansoes = self.arrayExpansoes[0]
                         topoArrayEntrada = self.arrayEntrada[0]
@@ -80,3 +84,4 @@ class Sintatico:
         if not self.erro:
             print("Pilha: " + str(self.arrayExpansoes))
             print("Analise sintatica concluida com sucesso!")
+            self.analise_semantica.printaTabelaSimbolos();
