@@ -24,7 +24,7 @@ class Sintatico:
     def parseia(self):
         print("Comecando analise sintatica...\n")
 
-        self.analise_semantica = analisadorSemantico.Semantico(self.arrayTokens)
+        self.analise_semantica = analisadorSemantico.Semantico(self.arrayTokens, self.arrayLexemas)
 
         self.montaArrayEntrada()
         self.arrayEntrada.append('$')
