@@ -14,7 +14,7 @@ class Semantico:
     def executaAcaoSemantica(self, token, linha, proximoToken, lexema, posicaoToken):
         if token == tokenTypeEnum.TokenType.NOMEVARIAVEL.value:
             if proximoToken == 39 or proximoToken == 41 or proximoToken == 44:
-                self.insereTabelaSimbolos(lexema, "variavel", 0, linha, posicaoToken)
+                self.insereTabelaSimbolos(lexema, 0, linha, posicaoToken)
 
         # Verificação de tipos em operações
         if self.isOperador(token):
@@ -24,9 +24,29 @@ class Semantico:
             tipo1 = self.buscaTipoOperando(operando1)
             tipo2 = self.buscaTipoOperando(operando2)
 
+            operandoNaoInicializado = None
+
+            if tipo1 is None:
+                operandoNaoInicializado = operando1
+            elif tipo2 is None:
+                operandoNaoInicializado = operando2
+
+            if operandoNaoInicializado is not None:
+                print(f"Erro semantico: Variavel nao inicializada: {operandoNaoInicializado} na linha {linha}")
+                raise Exception("Erro semantico")
+
             self.verificaCompatibilidadeTipos(tipo1, tipo2, operando1, operando2, linha)
 
-    def insereTabelaSimbolos(self, nome, categoria, nivel, linha, posicaoToken):
+        if self.isCinCout(token):
+            tokenCinCout = self.arrayLexemas[posicaoToken + 1]
+
+            tipoToken = self.buscaTipoOperando(tokenCinCout)
+
+            if tipoToken is None and tokenCinCout != "literal":
+                print(f"Erro semantico: Variavel nao inicializada: {tokenCinCout} na linha {linha}")
+                raise Exception("Erro semantico")
+
+    def insereTabelaSimbolos(self, nome, nivel, linha, posicaoToken):
         self.verificaDuplicidadeVariaveis(nome, linha)
 
         categoria = self.buscaCategoriaNomeVariavel(posicaoToken)
@@ -38,7 +58,10 @@ class Semantico:
         self.tabela_simbolos.get("nivel").append(nivel)
 
     def isOperador(self, token):
-        return token in ["+", "-", "*", "/"]
+        return token in ["+", "-", "*", "/", "=="]
+    
+    def isCinCout(self, token):
+        return token in ["<<", ">>"]
 
     def buscaTipoVariavel(self, posicaoToken, categoria):
         tipo = None
@@ -88,6 +111,8 @@ class Semantico:
                 return "string"
             elif operando.startswith("'") and operando.endswith("'"):
                 return "char"
+            elif operando.startswith("`") and operando.endswith("`"):
+                return "literal"
             else:
                 return None
 
