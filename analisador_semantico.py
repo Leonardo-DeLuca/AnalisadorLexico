@@ -92,10 +92,16 @@ class Semantico:
                 return None
 
     def printaTabelaSimbolos(self):
-        print(self.tabela_simbolos.get("nome"))
-        print(self.tabela_simbolos.get("categoria"))
-        print(self.tabela_simbolos.get("tipo"))
-        print(self.tabela_simbolos.get("nivel"))
+        nomes = self.tabela_simbolos.get("nome")
+        categorias = self.tabela_simbolos.get("categoria")
+        tipos = self.tabela_simbolos.get("tipo")
+        niveis = self.tabela_simbolos.get("nivel")
+        
+        print()
+        print(f"{'Nome':<20}{'Categoria':<20}{'Tipo':<20}{'Nível':<20}")
+        print("="*65)
+        for nome, categoria, tipo, nivel in zip(nomes, categorias, tipos, niveis):
+            print(f"{nome:<20}{categoria:<20}{tipo:<20}{nivel:<20}")
 
     ##### ERROS SEMANTICOS #####
 
