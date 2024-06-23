@@ -243,13 +243,12 @@ def processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual, lex
         lexema_original.append(lexema)
         adicionaLexemasETokens(dicionario, lexemas, tokens, lexema)
         linhas.append(linha_atual)
-    elif re.search("^\d+$", lexema):
+    elif re.search("^[-]?\d+$", lexema):
         lexema_original.append(lexema)
-        lexemaNumerico = int(lexema) 
+        lexemaNumerico = int(lexema)
         if lexemaNumerico > 999999 or lexemaNumerico < -999999:
-            print("Erro: tamanho do numero invalido na linha %d" %linha_atual)
+            print(f"Erro: tamanho do número inválido na linha {linha_atual}")
         else:
-            lexema_original.append(lexema)
             adicionaLexemasETokens(dicionario, lexemas, tokens, "numerointeiro")
             linhas.append(linha_atual)
     elif re.search("^\d+\.\d+$", lexema):
@@ -262,23 +261,22 @@ def processaLexema(dicionario, lexemas, tokens, lexema, linhas, linha_atual, lex
         linhas.append(linha_atual)
     else:
         if re.search("\d+\.", lexema):
-                partesString = lexema.split(".")
-                if partesString[1] == '':
-                    print("Erro: numero decimal sem casas apos o . na linha %d" %linha_atual)
-                else:
-                    for char in partesString[1]:
-                        if invalidosDecimal(char):
-                            print("Erro: numero decimal invalido na linha %d" %linha_atual)
-                            break
+            partesString = lexema.split(".")
+            if partesString[1] == '':
+                print(f"Erro: número decimal sem casas após o ponto na linha {linha_atual}")
+            else:
+                for char in partesString[1]:
+                    if invalidosDecimal(char):
+                        print(f"Erro: número decimal inválido na linha {linha_atual}")
+                        break
         elif re.search("^[\W\d].*$", lexema):
-            print("Erro: nome de variavel invalido na linha %d" %linha_atual)
+            print(f"Erro: nome de variável inválido na linha {linha_atual}")
         elif re.search("[a-zA-Z_]+[^a-zA-Z_\d]*", lexema):
-            print("Erro: nome de variavel invalido na linha %d" %linha_atual)
-
+            print(f"Erro: nome de variável inválido na linha {linha_atual}")
         else:
             for char in lexema:
                 if not validaAscii(char):
-                    print("Erro: caracter invalido na linha %d" %linha_atual)
+                    print(f"Erro: caracter inválido na linha {linha_atual}")
                     break
 
 def parseia(arquivo):
