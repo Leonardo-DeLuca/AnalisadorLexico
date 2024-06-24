@@ -84,4 +84,3 @@ class Sintatico:
         if not self.erro:
             print("Pilha: " + str(self.arrayExpansoes))
             print("Analise sintatica concluida com sucesso!")
-            self.analise_semantica.printaTabelaSimbolos()

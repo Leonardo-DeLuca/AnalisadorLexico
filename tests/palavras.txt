@@ -3,7 +3,23 @@ void main {
     majors: integer;
 
     integer funcaoExemplo(float params) {
+        teclado: string;
+        precoSetup: float;
+
+        string funcao2(string teste) {
+            test: integer;
+            variavelFuncao2: string;
+
+            inicio;
+
+            fim
+
+            return ('')
+        }
+
         inicio;
+
+        fallen = "test";
 
         fim
         

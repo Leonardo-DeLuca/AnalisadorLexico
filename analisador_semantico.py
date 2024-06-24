@@ -10,11 +10,13 @@ class Semantico:
         }
         self.arrayTokens = arrayTokens
         self.arrayLexemas = arrayLexemas
+        self.nivelAtual = 0
 
     def executaAcaoSemantica(self, token, linha, proximoToken, lexema, posicaoToken):
         if token == tokenTypeEnum.TokenType.NOMEVARIAVEL.value:
             if proximoToken == 39 or proximoToken == 41 or proximoToken == 44:
-                self.insereTabelaSimbolos(lexema, 0, linha, posicaoToken)
+                self.insereTabelaSimbolos(lexema, linha, posicaoToken)
+                self.printaTabelaSimbolos()
 
         # Verificação de tipos em operações
         if self.isOperador(token):
@@ -32,6 +34,7 @@ class Semantico:
                 operandoNaoInicializado = operando2
 
             if operandoNaoInicializado is not None:
+
                 print(f"Erro semantico: Variavel nao inicializada: {operandoNaoInicializado} na linha {linha}")
                 raise Exception("Erro semantico")
 
@@ -45,9 +48,14 @@ class Semantico:
             if tipoToken is None and tokenCinCout != "literal":
                 print(f"Erro semantico: Variavel nao inicializada: {tokenCinCout} na linha {linha}")
                 raise Exception("Erro semantico")
+            
+        if token == tokenTypeEnum.TokenType.RETURN.value:
+            self.executaSaidaDeFuncao()
+            self.printaTabelaSimbolos()
 
-    def insereTabelaSimbolos(self, nome, nivel, linha, posicaoToken):
-        self.verificaDuplicidadeVariaveis(nome, linha)
+
+    def insereTabelaSimbolos(self, nome, linha, posicaoToken):
+        self.verificaDuplicidadeVariaveis(nome, self.nivelAtual, linha)
 
         categoria = self.buscaCategoriaNomeVariavel(posicaoToken)
         tipo = self.buscaTipoVariavel(posicaoToken, categoria)
@@ -55,10 +63,13 @@ class Semantico:
         self.tabela_simbolos.get("nome").append(nome)
         self.tabela_simbolos.get("categoria").append(categoria)
         self.tabela_simbolos.get("tipo").append(tipo)
-        self.tabela_simbolos.get("nivel").append(nivel)
+        self.tabela_simbolos.get("nivel").append(self.nivelAtual)
+
+        if categoria == 'funcao':
+            self.nivelAtual += 1
 
     def isOperador(self, token):
-        return token in ["+", "-", "*", "/", "=="]
+        return token in ["+", "-", "=", "*", "/", "==", "!="]
     
     def isCinCout(self, token):
         return token in ["<<", ">>"]
@@ -107,9 +118,9 @@ class Semantico:
         elif operando.replace(".", "", 1).isdigit():
             return "float"
         else:
-            if operando.startswith('"') and operando.endswith('"'):
+            if (operando.startswith('"') and operando.endswith('"')) or operando == "nomedastring":
                 return "string"
-            elif operando.startswith("'") and operando.endswith("'"):
+            elif (operando.startswith("'") and operando.endswith("'")) or operando == "nomedochar":
                 return "char"
             elif operando.startswith("`") and operando.endswith("`"):
                 return "literal"
@@ -123,17 +134,24 @@ class Semantico:
         niveis = self.tabela_simbolos.get("nivel")
         
         print()
+        print("###### TABELA DE SIMBOLOS MODIFICADA ######")
         print(f"{'Nome':<20}{'Categoria':<20}{'Tipo':<20}{'Nível':<20}")
         print("="*65)
         for nome, categoria, tipo, nivel in zip(nomes, categorias, tipos, niveis):
             print(f"{nome:<20}{categoria:<20}{tipo:<20}{nivel:<20}")
+        print()
 
     ##### ERROS SEMANTICOS #####
 
-    def verificaDuplicidadeVariaveis(self, nome, linha):
+    def verificaDuplicidadeVariaveis(self, nome, nivel, linha):
         if nome in self.tabela_simbolos.get("nome"):
-            print(f"Erro semantico: Variavel ou funcao '{nome}' ja declarada na linha {linha}")
-            raise Exception("Erro semantico")
+            indice = self.tabela_simbolos.get("nome").index(nome)
+            nivelVariavel = self.tabela_simbolos.get("nivel")[indice]
+
+            if nivel == nivelVariavel:
+                print(f"Erro semantico: Variavel ou funcao '{nome}' ja declarada na linha {linha}")
+                raise Exception("Erro semantico")
+
 
     def verificaCompatibilidadeTipos(self, tipo1, tipo2, operando1, operando2, linha):
         tipos_compativeis = {
@@ -149,3 +167,16 @@ class Semantico:
         ):
             print(f"Erro semantico: Tipos incompatíveis entre: {operando1}({tipo1}) e {operando2}({tipo2}) na linha {linha}")
             raise Exception("Erro semantico")
+
+    def executaSaidaDeFuncao(self):
+        indices_para_remover = []
+
+        for i in range(len(self.tabela_simbolos["nome"])):
+            if self.tabela_simbolos["nivel"][i] == self.nivelAtual:
+                indices_para_remover.append(i)
+
+        for i in reversed(indices_para_remover):
+            for chave in self.tabela_simbolos:
+                del self.tabela_simbolos[chave][i]
+
+        self.nivelAtual -= 1
